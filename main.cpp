@@ -40,6 +40,7 @@ class Punctuation {
         int asc_dot = 46;
         int asc_tdot = 58;
         int asc_cdot = 59;
+        int asc_virg = 44;
         int asc_equal = 61;
 
         bool frag_pont = true;
@@ -61,6 +62,7 @@ class Punctuation {
         bool AutomatoSimDot(string punctuation);
         bool AutomatoSimTDot(string punctuation);
         bool AutomatoSimCDot(string punctuation);
+        bool AutomatoSimVirg(string punctuation);
         bool AutomatoSimEqual(string punctuation); 
         bool AutomatoSimAtrib(string punctuation);
         bool AutomatoSimBigEqual(string punctuation);
@@ -101,14 +103,14 @@ int main(int argc, char *argv[])
                     c = *it;
 
                     // Lida com os simbolos mais comuns
-                    if ( (flag == false) && ( (c == '=') || (c == ';') || (c == '(') || (c == ')') || (c == '+') || (c == '-') || (c == '/') || (c == '*') ) )
+                    if ( (flag == false) && ( (c == '=') || (c == ',') || (c == ';') || (c == '(') || (c == ')') || (c == '+') || (c == '-') || (c == '/') || (c == '*') ) )
                     {
                         if(word != "") token(word);
                         word = "";
                         word.push_back(c);
                         if( it != (word_aux.end()-1) )
                         {
-                            token(word);
+                            if(word != "") token(word);
                             word = "";
                         }
                     }
@@ -126,12 +128,12 @@ int main(int argc, char *argv[])
                         if( ((word == ":" ) && (c == '='))  || ((word == "<" ) && (c == '>')) || ((word == ">" ) && (c == '=')) || ((word == "<" ) && (c == '=')) )
                         {
                             word.push_back(c);
-                            token(word);
+                            if(word != "") token(word);
                             word = "";
                         }
                         else
                         {
-                            token(word);
+                            if(word != "") token(word);
                             word = "";
                             word.push_back(c);
                         }
@@ -139,7 +141,7 @@ int main(int argc, char *argv[])
                     }
                     else if ( (c == '.') && (word=="end") )
                     {
-                        token(word);
+                        if(word != "") token(word);
                         word = "";
                         word.push_back(c);
                     }
@@ -147,7 +149,7 @@ int main(int argc, char *argv[])
                     else word.push_back(c);
                 }
 
-                token(word);
+                if(word != "") token(word);
                 word = "";
             }
         }
@@ -210,6 +212,8 @@ void token(string word)
             flag_pont = pont.AutomatoSimTDot(word);
         if(flag_pont == false)
             flag_pont = pont.AutomatoSimCDot(word);
+        if(flag_pont == false)
+            flag_pont = pont.AutomatoSimVirg(word);
         if(flag_pont == false)
             flag_pont = pont.AutomatoSimEqual(word);
         if(flag_pont == false)
@@ -348,6 +352,14 @@ bool Punctuation::AutomatoSimTDot(string punctuation){
 bool Punctuation::AutomatoSimCDot(string punctuation){
     if(asc_cdot == (*punctuation.begin())){
         name_token = "simb_pv";
+        return true;
+    }
+    return false;
+}
+
+bool Punctuation::AutomatoSimVirg(string punctuation){
+    if(asc_virg == (*punctuation.begin())){
+        name_token = "simb_virg";
         return true;
     }
     return false;
