@@ -31,7 +31,7 @@ int main(int argc, char *argv[])
                 for(it = word_aux.begin(); it != word_aux.end(); ++it)
                 {
                     c = *it;
-                    if ( (flag == false) && (c == '=') || (c == ';') || (c == '.') || (c == '(') || (c == ')') || (c == '+') || (c == '-') || (c == '/') || (c == '*') || (c == '>') )
+                    if ( (flag == false) && ( (c == '=') || (c == ';') || (c == '.') || (c == '(') || (c == ')') || (c == '+') || (c == '-') || (c == '/') || (c == '*') ) )
                     {
                         if(word != "") token(word);
                         word = "";
@@ -42,16 +42,16 @@ int main(int argc, char *argv[])
                             word = "";
                         }
                     }
-                    else if ( (flag == false) && (c == ':') || (c == '<') )
+                    else if ( (flag == false) && ( (c == ':') || (c == '<') || (c == '>')) )
                     {
-                        if(word != "") token(word);
+                        if(word != "") token(word); 
                         word = "";
                         word.push_back(c);
                         flag = true;
                     }
                     else if (flag == true)
                     {
-                        if( ((word == ":" ) && (c == '='))  || ((word == "<" ) && (c == '>')) )
+                        if( ((word == ":" ) && (c == '='))  || ((word == "<" ) && (c == '>')) || ((word == ">" ) && (c == '=')) || ((word == "<" ) && (c == '=')) )
                         {
                             word.push_back(c);
                             token(word);
