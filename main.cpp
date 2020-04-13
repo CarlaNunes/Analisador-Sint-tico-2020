@@ -8,6 +8,7 @@
 using namespace std;
 
 int count_tokens = 0;
+string name_token = "";
 
 void token(string word);
 
@@ -36,8 +37,7 @@ class Punctuation {
         int asc_small = 60;
         int asc_open = 40;
         int asc_close = 41;
-        int asc_coma = 46;
-        int asc_dot = 44;
+        int asc_dot = 46;
         int asc_tdot = 58;
         int asc_cdot = 59;
         int asc_equal = 61;
@@ -58,7 +58,6 @@ class Punctuation {
         bool AutomatoSimSmall(string punctuation);
         bool AutomatoSimOpen(string  punctuation);
         bool AutomatoSimClose(string punctuation);
-        bool AutomatoSimComa(string punctuation);
         bool AutomatoSimDot(string punctuation);
         bool AutomatoSimTDot(string punctuation);
         bool AutomatoSimCDot(string punctuation);
@@ -102,7 +101,7 @@ int main(int argc, char *argv[])
                     c = *it;
 
                     // Lida com os simbolos mais comuns
-                    if ( (flag == false) && ( (c == '=') || (c == ';') /*|| (c == '.') */ || (c == '(') || (c == ')') || (c == '+') || (c == '-') || (c == '/') || (c == '*') ) )
+                    if ( (flag == false) && ( (c == '=') || (c == ';') || (c == '(') || (c == ')') || (c == '+') || (c == '-') || (c == '/') || (c == '*') ) )
                     {
                         if(word != "") token(word);
                         word = "";
@@ -138,6 +137,12 @@ int main(int argc, char *argv[])
                         }
                         flag = false;
                     }
+                    else if ( (c == '.') && (word=="end") )
+                    {
+                        token(word);
+                        word = "";
+                        word.push_back(c);
+                    }
                     // Caracteres normais
                     else word.push_back(c);
                 }
@@ -157,7 +162,6 @@ int main(int argc, char *argv[])
 
 void token(string word)
 {
-    // Declarar os possiveis tokens (classes)
     /* Objeto que reconhece numeros */
     Numbers num;
     bool flag_num;
@@ -166,9 +170,12 @@ void token(string word)
     Punctuation pont;
     bool flag_pont;
 
+
     /* Descobrindo se o numero asc da primeira letra da palavra é um numero
         e caso for, chama o automato que checa se é inteiro ou real*/
     if(num.asc_begin <= int (*word.begin()) &&  num.asc_end >= int (*word.begin() )){
+        
+
         flag_num = num.AutomatoNumInt(word);
 
         if(flag_num == false)
@@ -180,7 +187,7 @@ void token(string word)
 
     /* Descobrindo se o numero asc da primeira letra da palavra é uma pontuacao
         caso for, são chamados os automatos para reconhecer cada pontuação */
-    if(pont.asc_begin0 <= int (*word.begin()) &&  pont.asc_end0 >= int (*word.begin()) || pont.asc_begin1 <= int (*word.begin()) &&  pont.asc_end1 >= int (*word.begin() )){
+    else if(pont.asc_begin0 <= int (*word.begin()) &&  pont.asc_end0 >= int (*word.begin()) || pont.asc_begin1 <= int (*word.begin()) &&  pont.asc_end1 >= int (*word.begin() )){       
         flag_pont = pont.AutomatoSimPlus(word);
 
         if(flag_pont == false)
@@ -197,8 +204,6 @@ void token(string word)
             flag_pont = pont.AutomatoSimOpen(word);
         if(flag_pont == false)
             flag_pont = pont.AutomatoSimClose(word);
-        if(flag_pont == false)
-            flag_pont = pont.AutomatoSimComa(word);
         if(flag_pont == false)
             flag_pont = pont.AutomatoSimDot(word);
         if(flag_pont == false)
@@ -218,7 +223,16 @@ void token(string word)
         if(flag_pont == false)
             cout << "erro_dig  " << word << endl;
     }   
+
+    else
+    {
+        name_token = "id";
+    }
+    
+    cout << "Token " << count_tokens << ": " << word << ", " << name_token << endl;
+
     count_tokens++;
+    name_token = "";
 }
 
 
@@ -230,7 +244,7 @@ bool Numbers::AutomatoNumInt(string number){
         if( asc_begin > *it_num || asc_end < *it_num )
             return false;
     }
-    cout << "num_int   " <<  number << endl;
+    name_token = "num_int";
     return true;
 }
 
@@ -246,14 +260,14 @@ bool Numbers::AutomatoNumReal(string number){
                 return false;
         }      
     }
-    cout << "num_real  " << number << endl;
+    name_token = "num_real";
     return true;
 }
 
 /* Declarando os metodos da classe que reconhece pontuação */
 bool Punctuation::AutomatoSimPlus(string punctuation){
     if(asc_plus == (*punctuation.begin())){
-        cout << "sim_soma  " << punctuation << endl;
+        name_token = "simb_soma";
         return true;
     }
     return false;
@@ -261,7 +275,7 @@ bool Punctuation::AutomatoSimPlus(string punctuation){
 
 bool Punctuation::AutomatoSimLess(string punctuation){
     if(asc_less == (*punctuation.begin())){
-        cout << "sim_subt  " << punctuation << endl;
+        name_token = "simb_sub";
         return true;
     }
     return false;
@@ -269,7 +283,7 @@ bool Punctuation::AutomatoSimLess(string punctuation){
 
 bool Punctuation::AutomatoSimMult(string punctuation){
     if(asc_mult == (*punctuation.begin())){
-        cout << "sim_mult  " << punctuation << endl;
+        name_token = "simb_mult";
         return true;
     }
     return false;
@@ -277,7 +291,7 @@ bool Punctuation::AutomatoSimMult(string punctuation){
 
 bool Punctuation::AutomatoSimShare(string punctuation){
     if(asc_share == (*punctuation.begin())){
-        cout << "sim_div   " << punctuation << endl;
+        name_token = "simb_div";
         return true;
     }
     return false;
@@ -285,7 +299,7 @@ bool Punctuation::AutomatoSimShare(string punctuation){
 
 bool Punctuation::AutomatoSimBig(string punctuation){
     if(punctuation.length() == 1 && asc_big == (*punctuation.begin())){
-        cout << "sim_maior  " << punctuation << endl;
+        name_token = "simb_maior";
         return true;
     }
     return false;
@@ -293,7 +307,7 @@ bool Punctuation::AutomatoSimBig(string punctuation){
 
 bool Punctuation::AutomatoSimSmall(string punctuation){
     if(punctuation.length() == 1 && asc_small == (*punctuation.begin())){
-        cout << "sim_menor  " << punctuation << endl;
+        name_token = "simb_menor";
         return true;
     }
     return false;
@@ -301,7 +315,7 @@ bool Punctuation::AutomatoSimSmall(string punctuation){
 
 bool Punctuation::AutomatoSimOpen(string punctuation){
     if(asc_open == (*punctuation.begin())){
-        cout << "sim_apar  " << punctuation << endl;
+        name_token = "simb_apar";
         return true;
     }
     return false;
@@ -309,15 +323,7 @@ bool Punctuation::AutomatoSimOpen(string punctuation){
 
 bool Punctuation::AutomatoSimClose(string punctuation){
     if(asc_close == (*punctuation.begin())){
-        cout << "sim_fpar  " << punctuation << endl;
-        return true;
-    }
-    return false;
-}
-
-bool Punctuation::AutomatoSimComa(string punctuation){
-    if(asc_coma == (*punctuation.begin())){
-        cout << "sim_virg  " << punctuation << endl;
+        name_token = "simb_fpar";
         return true;
     }
     return false;
@@ -325,7 +331,7 @@ bool Punctuation::AutomatoSimComa(string punctuation){
 
 bool Punctuation::AutomatoSimDot(string punctuation){
     if(asc_dot == (*punctuation.begin())){
-        cout << "sim_pont  " << punctuation << endl;
+        name_token = "simb_pont";
         return true;
     }
     return false;
@@ -333,7 +339,7 @@ bool Punctuation::AutomatoSimDot(string punctuation){
 
 bool Punctuation::AutomatoSimTDot(string punctuation){
     if(punctuation.length() == 1 && asc_tdot == (*punctuation.begin())){
-        cout << "sim_dp    " << punctuation << endl;
+        name_token = "simb_dp";
         return true;
     }
     return false;
@@ -341,7 +347,7 @@ bool Punctuation::AutomatoSimTDot(string punctuation){
 
 bool Punctuation::AutomatoSimCDot(string punctuation){
     if(asc_cdot == (*punctuation.begin())){
-        cout << "sim_pv    " << punctuation << endl;
+        name_token = "simb_pv";
         return true;
     }
     return false;
@@ -349,7 +355,7 @@ bool Punctuation::AutomatoSimCDot(string punctuation){
 
 bool Punctuation::AutomatoSimEqual(string punctuation){
     if(asc_equal == (*punctuation.begin())){
-        cout << "sim_igual " << punctuation << endl;
+        name_token = "simb_igual";
         return true;
     }
     return false;
@@ -357,7 +363,7 @@ bool Punctuation::AutomatoSimEqual(string punctuation){
 
 bool Punctuation::AutomatoSimAtrib(string punctuation){
     if(punctuation.length() == 2 && (*punctuation.begin() == asc_tdot) && (punctuation.at(1) == asc_equal)){
-        cout << "sim_atrib " << punctuation << endl;
+        name_token = "simb_atri";
         return true;
     }
     return false;
@@ -365,7 +371,7 @@ bool Punctuation::AutomatoSimAtrib(string punctuation){
 
 bool Punctuation::AutomatoSimBigEqual(string punctuation){
     if(punctuation.length() == 2 && (*punctuation.begin() == asc_big) && (punctuation.at(1) == asc_equal)){
-        cout << "sim_maig  " << punctuation << endl;
+        name_token = "simb_maig";
         return true;
     }
     return false;
@@ -373,7 +379,7 @@ bool Punctuation::AutomatoSimBigEqual(string punctuation){
 
 bool Punctuation::AutomatoSimSmallEqual(string punctuation){
     if(punctuation.length() == 2 && (*punctuation.begin() == asc_small) && (punctuation.at(1) == asc_equal)){
-        cout << "sim_meig  " << punctuation << endl;
+        name_token = "simb_meig";
         return true;
     }
     return false;
@@ -381,7 +387,7 @@ bool Punctuation::AutomatoSimSmallEqual(string punctuation){
 
 bool Punctuation::AutomatoSimDif(string punctuation){
     if(punctuation.length() == 2 && (*punctuation.begin() == asc_small) && (punctuation.at(1) == asc_big)){
-        cout << "sim_dif   " << punctuation << endl;
+        name_token = "simb_dif";
         return true;
     }
     return false;

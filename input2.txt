@@ -1,0 +1,8 @@
+program p;
+var x:integer;
+begin
+	x:=1.578;
+	while(x<=3) do
+		if (x<>2) then
+			x:=x+12.5;
+end.
