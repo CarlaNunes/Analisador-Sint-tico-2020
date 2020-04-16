@@ -70,7 +70,7 @@ class Punctuation {
         bool AutomatoSimDif(string punctuation);          
 };
 
-class Words {
+class Reserved {
     private:
         string program = "program";
         string begin = "begin";
@@ -108,7 +108,8 @@ int main(int argc, char *argv[])
     string word, word_aux;
     string::iterator it;
     char c;
-    bool flag = false; // flag para lidar com tokens que são símbolos de 2 caracteres (eg. <>, >=)
+    bool flag_2s = false; // flag para lidar com tokens que são símbolos de 2 caracteres (eg. <>, >=)
+    bool flag_comment = false;
 
     ifstream file (argv[1]); // Abre o arquivo
 
@@ -134,7 +135,7 @@ int main(int argc, char *argv[])
                     c = *it;
 
                     // Lida com os simbolos mais comuns
-                    if ( (flag == false) && ( (c == '=') || (c == ',') || (c == ';') || (c == '(') || (c == ')') || (c == '+') || (c == '-') || (c == '/') || (c == '*') ) )
+                    if ( (flag_comment == false) && (flag_2s == false) && ( (c == '=') || (c == ',') || (c == ';') || (c == '(') || (c == ')') || (c == '+') || (c == '-') || (c == '/') || (c == '*') ) )
                     {
                         if(word != "") token(word);
                         word = "";
@@ -146,15 +147,15 @@ int main(int argc, char *argv[])
                         }
                     }
                     // Lida com os simbolos que podem começar tokens de 2 caracteres
-                    else if ( (flag == false) && ( (c == ':') || (c == '<') || (c == '>')) )
+                    else if ( (flag_comment == false) && (flag_2s == false) && ( (c == ':') || (c == '<') || (c == '>')) )
                     {
                         if(word != "") token(word); 
                         word = "";
                         word.push_back(c);
-                        flag = true;
+                        flag_2s = true;
                     }
                     // Lida com o caso de ser identificado um possível simbolo de 2 caracteres
-                    else if (flag == true)
+                    else if ( (flag_comment == false) && (flag_2s == true) )
                     {
                         if( ((word == ":" ) && (c == '='))  || ((word == "<" ) && (c == '>')) || ((word == ">" ) && (c == '=')) || ((word == "<" ) && (c == '=')) )
                         {
@@ -168,16 +169,20 @@ int main(int argc, char *argv[])
                             word = "";
                             word.push_back(c);
                         }
-                        flag = false;
+                        flag_2s = false;
                     }
-                    else if ( (c == '.') && (word=="end") )
+                    else if ( (flag_comment == false) && (c == '.') && (word=="end") )
                     {
                         if(word != "") token(word);
                         word = "";
                         word.push_back(c);
                     }
+                    else if ( (flag_comment == false) && (c == '{') )
+                        flag_comment = true;
+                    else if ( (flag_comment == true) && (c == '}') )
+                        flag_comment = false;
                     // Caracteres normais
-                    else word.push_back(c);
+                    else if (flag_comment == false) word.push_back(c);
                 }
 
                 if(word != "") token(word);
@@ -203,7 +208,7 @@ void token(string word)
     Punctuation pont;
     bool flag_pont;
 
-    Words ident;
+    Reserved ident;
     bool flag_ident;
 
 
@@ -443,7 +448,7 @@ bool Punctuation::AutomatoSimDif(string punctuation){
     return false;
 }
 
-bool Words::AutomatoIdent(string ident){
+bool Reserved::AutomatoIdent(string ident){
     string::iterator it_ident;
     for(it_ident = ident.begin(); it_ident != ident.end(); ++it_ident){
         if( asc_begin2 > *it_ident || (asc_end2 < *it_ident && asc_begin0 > *it_ident) || asc_end1 < *it_ident || (asc_end0 < *it_ident && asc_begin1 > *it_ident) )
