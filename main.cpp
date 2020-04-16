@@ -123,8 +123,8 @@ int main(int argc, char *argv[])
 
                 /* 
                 As palavras retornadas podem conter mais de um 1 token, 
-                pois a separação é feita com base em espaços em branco e nem 
-                sempre os tokens do programa tem espaços em branco entre si
+                pois a separação é feita com base em espaços em branco e quebras de linha
+                e nem sempre os tokens do programa tem espaços em branco entre si
                 Exemplo: var x:integer; 
                         - Retornará: "var" e "x:integer;"
                 O próximo for itera sobre a palavra retornada, caractere por
@@ -171,12 +171,14 @@ int main(int argc, char *argv[])
                         }
                         flag_2s = false;
                     }
+                    // Lida com o final do programa
                     else if ( (flag_comment == false) && (c == '.') && (word=="end") )
                     {
                         if(word != "") token(word);
                         word = "";
                         word.push_back(c);
                     }
+                    // Lida com comentários
                     else if ( (flag_comment == false) && (c == '{') )
                         flag_comment = true;
                     else if ( (flag_comment == true) && (c == '}') )
@@ -188,11 +190,12 @@ int main(int argc, char *argv[])
                 if(word != "") token(word);
                 word = "";
             }
+            if (flag_comment == true) cout << "erro(comentário não finalizado)" << endl;
         }
         file.close();
     }
 
-    else cout << "Erro ao ler o programa"; 
+    else cout << "erro(abertura do arquivo)"; 
 
     return 0;
 } 
