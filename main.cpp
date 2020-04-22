@@ -6,8 +6,11 @@
 
 using namespace std;
 
+ofstream file_out; // Arquivo de saída
+
 int count_tokens = 0;
 string name_token = "";
+
 bool flag_erro = false;
 string msg_erro = "";
 
@@ -21,13 +24,15 @@ int main(int argc, char *argv[])
     bool flag_2s = false; // flag para lidar com tokens que são símbolos de 2 caracteres (eg. <>, >=)
     bool flag_comment = false;
 
-    ifstream file (argv[1]); // Abre o arquivo
+    ifstream file_in (argv[1]); // Arquivo de entrada
 
-    if (file.is_open()) // Testa se o arquivo foi aberto corretamente
+    file_out.open("saida.txt"); // Cria o arquivo de saída
+
+    if (file_in.is_open()) // Testa se o arquivo foi aberto corretamente
     {
-        while (! file.eof() ) // Verifica se nao esta no final do arquivo
+        while (! file_in.eof() ) // Verifica se nao esta no final do arquivo
         {
-            while(file >> word_aux) // Itera sobre o arquivo, palavra por palavra
+            while(file_in >> word_aux) // Itera sobre o arquivo, palavra por palavra
             {
                 //cout << "Original: " << word_aux << endl;
 
@@ -102,10 +107,14 @@ int main(int argc, char *argv[])
             }
             if (flag_comment == true) cout << "erro(comentário não finalizado)" << endl;
         }
-        file.close();
+        file_in.close();
+    }
+    else {
+        cout << "erro na abertura do arquivo" << endl; 
+        file_out << "erro na abertura do arquivo" << endl; 
     }
 
-    else cout << "erro(abertura do arquivo)"; 
+    file_out.close();
 
     return 0;
 } 
@@ -159,8 +168,13 @@ void token(string word)
 
     else ErroLexico(3, &msg_erro, &flag_erro);
     
+    // Printar no terminal
     if(flag_erro) cout << "[Token " << count_tokens << "] " << word << ", " << msg_erro << endl;
     else cout << "[Token " << count_tokens << "] " << word << ", " << name_token << endl;
+
+    // Salvar no arquivo
+    if(flag_erro) file_out << word << ", " << msg_erro << endl;
+    else file_out << word << ", " << name_token << endl;
 
     count_tokens++;
     name_token = "";
